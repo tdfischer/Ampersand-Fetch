@@ -81,33 +81,9 @@ module.exports = function (method, model, options) {
   // Turn a jQuery.ajax formatted request into xhr compatible
   params.method = params.type;
 
-  var ajaxSettings = _.extend(params, options, {url: url});
+  var ajaxSettings = _.extend(params, options, {url: url, body: JSON.stringify(params.json)});
 
-  function status(response) {
-    if (response.status >= 200 && response.status < 300) {
-      return response;
-    }
-    throw new Error(response.statusText);
-  }
-
-  function json(response) {
-    return response.json();
-  }
-
-  var promise = fetch(url, ajaxSettings)
-    .then(status)
-    .then(json)
-    .then(function(json) {
-      if(options.success && _.isFunction(options.success)){
-        options.success(json);
-      }
-      return json;
-    }).catch(function(error) {
-      if(options.error && _.isFunction(options.error)) {
-        options.fail(error);
-      }
-      return error;
-    });
+  var promise = fetch(url, ajaxSettings);
 
   model.trigger('request', model, promise, options, ajaxSettings);
 
